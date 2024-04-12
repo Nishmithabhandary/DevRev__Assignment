@@ -3,7 +3,7 @@
 
 version: "2"
 name: "Nishmitha DevRev Assignment"
-description: "description"
+description: "Triage Resolution Optimizer"
 
 # This is the name displayed in DevRev where the Snap-In takes actions using the token of this service account.
 service_account:

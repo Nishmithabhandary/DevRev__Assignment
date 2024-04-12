@@ -87,8 +87,8 @@ async function updateWorkItemState(workItemType: string, workItemId: string, own
 async function createAndSendNotifications(workList: any[], devrevSDK: any, notifiedCount: number,devrevPAT:string) {
  
   const now = new Date();
-  const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000); // Calculate 1 hour ago
-  const twoHourAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000); // Calculate 2 hour ago
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000); // Calculate 3 days ago
+  const fourDaysAgo = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000); // Calculate 4 days ago
   const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); 
   const nextWeekFormatted = nextWeek.toISOString();
  
@@ -96,7 +96,7 @@ async function createAndSendNotifications(workList: any[], devrevSDK: any, notif
     
       if (
           workItem.created_date &&
-          new Date(workItem.created_date) < oneHourAgo &&
+          new Date(workItem.created_date) < threeDaysAgo &&
           workItem.owned_by
       ) {
         const ownerId = workItem.owned_by[0]?.id || '';
@@ -112,7 +112,7 @@ async function createAndSendNotifications(workList: any[], devrevSDK: any, notif
       }
       
       if(workItem.created_date &&
-        new Date(workItem.created_date) < twoHourAgo &&
+        new Date(workItem.created_date) < fourDaysAgo &&
         workItem.owned_by){
         const ownerId = workItem.owned_by[0]?.id || '';
         const display_id = workItem.display_id || '';
