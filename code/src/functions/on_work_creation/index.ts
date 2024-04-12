@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { client } from "@devrev/typescript-sdk";
 
+//List all the work items which are present in Triage stage
 async function fetchWorkItems(API_BASE: string, devrevPAT: string) {
   try {
     console.log('Fetching work items in the triage stage...');
@@ -15,31 +16,44 @@ async function fetchWorkItems(API_BASE: string, devrevPAT: string) {
     return workList;
   } catch (error) {
     console.error('Error fetching work items:', error);
-    throw error; // Rethrow the error for higher-level handling
+    throw error; 
   }
 }
 
-async function fetchTimelineEntries(workItemId: string, devrevPAT: string) {
+
+//Update the work item target date if it is in triage state for more than 3 days
+async function updateWorkItemTargetDate(workItemType: string, workItemId: string, ownerId: string, targetCloseDate: string, display_id: string, devrevPAT: string, devrevSDK: any) {
+
   try {
-    const response = await axios.get(`https://api.devrev.ai/timeline-entries.list?object=${workItemId}`, {
-      headers: {
-        Authorization: `Bearer ${devrevPAT}`
-      }
-    });
+      await axios.post(`https://api.devrev.ai/works.update`, {
+          type: workItemType,
+          id: workItemId,
+          target_close_date:targetCloseDate
+      }, {
+          headers: {
+              Authorization: `Bearer ${devrevPAT}`,
+              'Content-Type': 'application/json',
+          }
+      });
+     
+      const message = `Hey <${ownerId}>,the work item is in triage state from past 3 days.Please take a look.`;
 
-    const timelineEntries = response.data.timeline_entries || [];
-    
-    const bodyArray=timelineEntries.map((entry: { body: string }) => entry.body);
-    console.info("body........")
-    console.info(bodyArray)
-    console.info("body........")
-    return bodyArray;
+      const body = {
+          type: 'timeline_comment',
+          object: workItemId,
+          body: message
+      };
+  
+      await devrevSDK.timelineEntriesCreate(body);
+      console.log(`Notification sent to ${ownerId} for work item ${workItemId}.`);
+
   } catch (error) {
-    console.info(error);
-    return [];
+      console.error('Error updating work item state:', error);
+      
   }
 }
 
+// Update the priority level of work item to P1 if work item is in triage state for more than 4 days
 async function updateWorkItemState(workItemType: string, workItemId: string, ownerId: string, newPriorityLevel: string, display_id: string, devrevPAT: string, devrevSDK: any) {
   try {
       await axios.post(`https://api.devrev.ai/works.update`, {
@@ -54,9 +68,6 @@ async function updateWorkItemState(workItemType: string, workItemId: string, own
       });
       console.log(`Work item ${workItemId} state updated to ${newPriorityLevel}`);
 
-      // Send a notification to the owner
-      // const workItem = await fetchWorkItems(workItemId, devrevPAT);
-      // const ownerId = workItem.owned_by[0]?.id || '';
       const message = `Hey <${ownerId}>, the work item ${display_id} has been moved to priority level p1.`;
 
       const body = {
@@ -68,17 +79,19 @@ async function updateWorkItemState(workItemType: string, workItemId: string, own
       console.log(`Notification sent to ${ownerId} for work item ${workItemId}.`);
   } catch (error) {
       console.error('Error updating work item state:', error);
-      // Handle the error as needed
+      
   }
 }
 
-
+//Send a message to the owner of the work item 
 async function createAndSendNotifications(workList: any[], devrevSDK: any, notifiedCount: number,devrevPAT:string) {
-  let notificationsToSend = [];
+ 
   const now = new Date();
   const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000); // Calculate 1 hour ago
+  const twoHourAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000); // Calculate 2 hour ago
+  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); 
+  const nextWeekFormatted = nextWeek.toISOString();
  
-
   for (const workItem of workList) {
     
       if (
@@ -87,33 +100,20 @@ async function createAndSendNotifications(workList: any[], devrevSDK: any, notif
           workItem.owned_by
       ) {
         const ownerId = workItem.owned_by[0]?.id || '';
+        const target_close_date = workItem.target_close_date; 
+        
           
-          const message = `Hey <${ownerId}>, work item is in triage state from long time`;
-
-          const timelineEntries = await fetchTimelineEntries(workItem.id, devrevPAT);
-          let similarMessage = false; // Flag to track if similar message is found
-
-          // Iterate over timelineEntries using traditional for loop
-          for (let i = 0; i < timelineEntries.length; i++) {
-              const entry = timelineEntries[i];
-              if (entry === message) {
-                  similarMessage = true;
-                  break; // Exit the loop if similar message is found
-              }
+        const display_id = workItem.display_id || '';
+          if(target_close_date==null || target_close_date==undefined){
+            await updateWorkItemTargetDate(workItem.type, workItem.id, ownerId, nextWeekFormatted, display_id, devrevPAT, devrevSDK);   
+              
           }
-
-          if (!similarMessage) {
-              const body = {
-                  type: 'timeline_comment',
-                  object: workItem.id,
-                  body: message
-              };
-              notificationsToSend.push(body);
-              notifiedCount++; // Increment notify count when adding a notification
-          }
+    
       }
       
-      else {
+      if(workItem.created_date &&
+        new Date(workItem.created_date) < twoHourAgo &&
+        workItem.owned_by){
         const ownerId = workItem.owned_by[0]?.id || '';
         const display_id = workItem.display_id || '';
         const priority = workItem.priority || ''; 
@@ -123,20 +123,7 @@ async function createAndSendNotifications(workList: any[], devrevSDK: any, notif
         }
     }
   }
-
-  // Send all collected notifications
-  for (const notification of notificationsToSend) {
-      try {
-          await devrevSDK.timelineEntriesCreate(notification);
-      } catch (error) {
-          console.error('Error sending notification:', error);
-          // Handle the error as needed
-      }
-  }
-
-  console.log(`Notified ${notifiedCount} work item owners.`);
 }
-
 
 async function handleEvent(event: any) {
   const devrevPAT = event.context.secrets.service_account_token;
