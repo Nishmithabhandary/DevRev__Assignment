@@ -3,15 +3,17 @@
 ## Step 1: Utilizing the DevRev API
 I have used POST https://api.devrev.ai/works.create API to create a work item. I have implemented it using JavaScript.
 
-### Link to code:[Work Item Creation](https://github.com/Nishmithabhandary/DevRev__Assignment/blob/master/step1-workitem.js)
+### Link to code:[### Work Item Creation](https://github.com/Nishmithabhandary/DevRev__Assignment/blob/master/step1-workitem.js)
 
 
-### Link to screenshot:
+### JavaScript code written for work item creation:
 ![Alt text](/screenshots/WorkItem_Creation.jpeg/?raw=true "Optional Title")
 
 
 ## Step 2: Creating a Snap-in
 ### Triage Resolution Optimizer Snap-in
+
+### Link to code:[### Snap-in Creation](https://github.com/Nishmithabhandary/DevRev__Assignment/tree/master/code)
 
 ### Overview
 The Triage Resolution Optimizer is a Snapin designed to streamline issue management within the triage stage of your workflow. This tool automates reminders and priority adjustments to ensure timely resolution of issues and enhance overall efficiency.
@@ -54,6 +56,7 @@ You can also add dependencies on external packages in package.json under the "de
 Once you are done with the testing,
 Run
 ```
+cd code
 npm run build
 npm run package
 ```
