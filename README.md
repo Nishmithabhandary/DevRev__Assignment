@@ -3,8 +3,12 @@
 ## Step 1:Utilizing the DevRev API
 I have used POST https://api.devrev.ai/works.create API to create a work item. I have implemented it using JavaScript.
 
-Link to code:[a link](https://github.com/user/repo/blob/branch/other_file.md)
-Link to screenshot:![Alt text](/screenshots/WorkItem_Creation.jpeg/?raw=true "Optional Title")
+###Link to code:[Work Item Creation](https://github.com/Nishmithabhandary/DevRev__Assignment/blob/master/step1-workitem.js)
+
+
+###Link to screenshot:
+![Alt text](/screenshots/WorkItem_Creation.jpeg/?raw=true "Optional Title")
+
 
 ## Step 2:Creating a Snap-in
 ### Triage Resolution Optimizer Snap-in
@@ -19,7 +23,20 @@ The Triage Resolution Optimizer is a Snapin designed to streamline issue managem
 
 3. **Efficiency Improvement**: Promotes accountability, reduces response times, and ensures a proactive approach to issue resolution.
 
-Link to screenshot:![Alt text](/relative/path/to/img.jpg?raw=true "Optional Title")
+### Link to screenshot:
+1. Bot triage and priority message 
+![Alt text](/screenshots/Bot_triage_and_priority_message.jpeg?raw=true "Optional Title")
+
+2. Bot triage message
+![Alt text](/screenshots/Bot_triage_message.jpeg?raw=true "Optional Title")
+
+3. My Snap-in creation for the snap-in development challenge
+![Alt text](/screenshots/My_snap-in.jpeg?raw=true "Optional Title")
+
+4. Work Items
+![Alt text](/screenshots/WorkItems_Issues.jpeg?raw=true "Optional Title")
+
+
 
 ## Getting Started 
 
